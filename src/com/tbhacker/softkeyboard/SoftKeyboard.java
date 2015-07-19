@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-package com.tbhacker.softkeyboard;
+package com.example.android.softkeyboard;
 
 import android.inputmethodservice.InputMethodService;
 import android.inputmethodservice.Keyboard;
 import android.inputmethodservice.KeyboardView;
 import android.text.InputType;
 import android.text.method.MetaKeyKeyListener;
+import android.util.Log;
 import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
 import android.view.View;
@@ -33,8 +34,6 @@ import android.view.inputmethod.InputMethodSubtype;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.example.android.softkeyboard.R;
-
 /**
  * Example of writing an input method for a soft keyboard.  This code is
  * focused on simplicity over completeness, so it should in no way be considered
@@ -45,7 +44,7 @@ import com.example.android.softkeyboard.R;
 public class SoftKeyboard extends InputMethodService 
         implements KeyboardView.OnKeyboardActionListener {
     static final boolean DEBUG = false;
-  
+    
     /**
      * This boolean indicates the optional example code for performing
      * processing of hard keys in addition to regular text generation
@@ -78,11 +77,14 @@ public class SoftKeyboard extends InputMethodService
     
     private String mWordSeparators;
     
+    private List<String> myStringList = new ArrayList<String>();
+    
     /**
      * Main initialization of the input method component.  Be sure to call
      * to super class.
      */
     @Override public void onCreate() {
+    	Log.i("test_dao","onCreate");
         super.onCreate();
         mInputMethodManager = (InputMethodManager)getSystemService(INPUT_METHOD_SERVICE);
         mWordSeparators = getResources().getString(R.string.word_separators);
@@ -93,6 +95,9 @@ public class SoftKeyboard extends InputMethodService
      * is called after creation and any configuration change.
      */
     @Override public void onInitializeInterface() {
+    	
+    	Log.i("test_dao","onInitializeInterface");
+    	
         if (mQwertyKeyboard != null) {
             // Configuration changes can happen after the keyboard gets recreated,
             // so we need to be able to re-build the keyboards if the available
@@ -113,6 +118,9 @@ public class SoftKeyboard extends InputMethodService
      * a configuration change.
      */
     @Override public View onCreateInputView() {
+    	
+    	Log.i("test_dao","onCreateInputView");
+    	
         mInputView = (LatinKeyboardView) getLayoutInflater().inflate(
                 R.layout.input, null);
         mInputView.setOnKeyboardActionListener(this);
@@ -125,6 +133,9 @@ public class SoftKeyboard extends InputMethodService
      * be generated, like {@link #onCreateInputView}.
      */
     @Override public View onCreateCandidatesView() {
+    	
+    	Log.i("test_dao","onCreateCandidatesView");
+    	
         mCandidateView = new CandidateView(this);
         mCandidateView.setService(this);
         return mCandidateView;
@@ -141,6 +152,8 @@ public class SoftKeyboard extends InputMethodService
         
         // Reset our state.  We want to do this even if restarting, because
         // the underlying state of the text editor could have changed in any way.
+        Log.i("test_dao","onStartInput");
+        
         mComposing.setLength(0);
         updateCandidates();
         
@@ -156,6 +169,7 @@ public class SoftKeyboard extends InputMethodService
         // We are now going to initialize our state based on the type of
         // text being edited.
         switch (attribute.inputType & InputType.TYPE_MASK_CLASS) {
+//        Log.i("test_dao","");
             case InputType.TYPE_CLASS_NUMBER:
             case InputType.TYPE_CLASS_DATETIME:
                 // Numbers and dates default to the symbols keyboard, with
@@ -231,6 +245,7 @@ public class SoftKeyboard extends InputMethodService
         super.onFinishInput();
         
         // Clear current composing text and candidates.
+        Log.i("test_dao","onFinishInput");
         mComposing.setLength(0);
         updateCandidates();
         
@@ -249,6 +264,7 @@ public class SoftKeyboard extends InputMethodService
     @Override public void onStartInputView(EditorInfo attribute, boolean restarting) {
         super.onStartInputView(attribute, restarting);
         // Apply the selected keyboard to the input view.
+        Log.i("test_dao","onStartInputView");
         mInputView.setKeyboard(mCurKeyboard);
         mInputView.closing();
         final InputMethodSubtype subtype = mInputMethodManager.getCurrentInputMethodSubtype();
@@ -258,6 +274,7 @@ public class SoftKeyboard extends InputMethodService
     @Override
     public void onCurrentInputMethodSubtypeChanged(InputMethodSubtype subtype) {
         mInputView.setSubtypeOnSpaceKey(subtype);
+        Log.i("test_dao","onCurrentInputMethodSubtypeChanged");
     }
 
     /**
@@ -271,6 +288,7 @@ public class SoftKeyboard extends InputMethodService
         
         // If the current selection in the text view changes, we should
         // clear whatever candidate text we have.
+        Log.i("test_dao","onUpdateSelection");
         if (mComposing.length() > 0 && (newSelStart != candidatesEnd
                 || newSelEnd != candidatesEnd)) {
             mComposing.setLength(0);
@@ -290,9 +308,11 @@ public class SoftKeyboard extends InputMethodService
      */
     @Override public void onDisplayCompletions(CompletionInfo[] completions) {
         if (mCompletionOn) {
+        	Log.i("test_dao","onDisplayCompletions");
             mCompletions = completions;
             if (completions == null) {
                 setSuggestions(null, false, false);
+                
                 return;
             }
             
@@ -311,6 +331,9 @@ public class SoftKeyboard extends InputMethodService
      * PROCESS_HARD_KEYS option.
      */
     private boolean translateKeyDown(int keyCode, KeyEvent event) {
+    	
+    	Log.i("test_dao","translateKeyDown");
+    	
         mMetaState = MetaKeyKeyListener.handleKeyDown(mMetaState,
                 keyCode, event);
         int c = event.getUnicodeChar(MetaKeyKeyListener.getMetaState(mMetaState));
@@ -348,6 +371,9 @@ public class SoftKeyboard extends InputMethodService
      * continue to the app.
      */
     @Override public boolean onKeyDown(int keyCode, KeyEvent event) {
+    	
+    	Log.i("test_dao","onKeyDown");
+    	
         switch (keyCode) {
             case KeyEvent.KEYCODE_BACK:
                 // The InputMethodService already takes care of the back
@@ -418,6 +444,9 @@ public class SoftKeyboard extends InputMethodService
         // If we want to do transformations on text being entered with a hard
         // keyboard, we need to process the up events to update the meta key
         // state we are tracking.
+    	
+    	Log.i("test_dao","onKeyUp");
+    	
         if (PROCESS_HARD_KEYS) {
             if (mPredictionOn) {
                 mMetaState = MetaKeyKeyListener.handleKeyUp(mMetaState,
@@ -432,6 +461,9 @@ public class SoftKeyboard extends InputMethodService
      * Helper function to commit any text being composed in to the editor.
      */
     private void commitTyped(InputConnection inputConnection) {
+    	
+    	Log.i("test_dao","commitTyped");
+    	
         if (mComposing.length() > 0) {
             inputConnection.commitText(mComposing, mComposing.length());
             mComposing.setLength(0);
@@ -444,6 +476,9 @@ public class SoftKeyboard extends InputMethodService
      * editor state.
      */
     private void updateShiftKeyState(EditorInfo attr) {
+    	
+    	Log.i("test_dao","updateShiftKeyState");
+    	
         if (attr != null 
                 && mInputView != null && mQwertyKeyboard == mInputView.getKeyboard()) {
             int caps = 0;
@@ -459,6 +494,9 @@ public class SoftKeyboard extends InputMethodService
      * Helper to determine if a given character code is alphabetic.
      */
     private boolean isAlphabet(int code) {
+    	
+    	Log.i("test_dao","isAlphabet");
+    	
         if (Character.isLetter(code)) {
             return true;
         } else {
@@ -470,6 +508,9 @@ public class SoftKeyboard extends InputMethodService
      * Helper to send a key down / key up pair to the current editor.
      */
     private void keyDownUp(int keyEventCode) {
+    	
+    	Log.i("test_dao","keyDownUp");
+    	
         getCurrentInputConnection().sendKeyEvent(
                 new KeyEvent(KeyEvent.ACTION_DOWN, keyEventCode));
         getCurrentInputConnection().sendKeyEvent(
@@ -480,6 +521,9 @@ public class SoftKeyboard extends InputMethodService
      * Helper to send a character to the editor as raw key events.
      */
     private void sendKey(int keyCode) {
+    	
+    	Log.i("test_dao","sendKey");
+    	
         switch (keyCode) {
             case '\n':
                 keyDownUp(KeyEvent.KEYCODE_ENTER);
@@ -497,6 +541,9 @@ public class SoftKeyboard extends InputMethodService
     // Implementation of KeyboardViewListener
 
     public void onKey(int primaryCode, int[] keyCodes) {
+    	
+    	Log.i("test_dao","onKey");
+    	
         if (isWordSeparator(primaryCode)) {
             // Handle separator
             if (mComposing.length() > 0) {
@@ -531,6 +578,9 @@ public class SoftKeyboard extends InputMethodService
     }
 
     public void onText(CharSequence text) {
+    	
+    	Log.i("test_dao","onText");
+    	
         InputConnection ic = getCurrentInputConnection();
         if (ic == null) return;
         ic.beginBatchEdit();
@@ -548,10 +598,428 @@ public class SoftKeyboard extends InputMethodService
      * candidates.
      */
     private void updateCandidates() {
+    	
+    	Log.i("test_dao","updateCandidates");
+    	
         if (!mCompletionOn) {
             if (mComposing.length() > 0) {
                 ArrayList<String> list = new ArrayList<String>();
                 list.add(mComposing.toString());
+                String value = mComposing.toString();
+                
+                //判断是不是需要推荐的词语
+                if(value.equals("i"))
+                {
+                	list.add("int");
+                	list.add("include");
+                	//list.add("i love you");
+                }
+                if(value.equals("in"))
+                {
+                	list.add("int");
+                	list.add("include");
+
+                }
+                if(value.equals("ch"))
+                {
+                	list.add("char");
+                }
+                if(value.equals("st"))
+                {
+                	list.add("string");
+                	list.add("struct");
+                }
+                if(value.equals("str"))
+                {
+                	list.add("string");
+                	list.add("struct");
+                }
+                if(value.equals("bo"))
+                {
+                	list.add("bool");
+                	list.add("boolean");
+                }
+                if(value.equals("fl"))
+                {
+                	list.add("float");
+                }
+                if(value.equals("do"))
+                {
+                	list.add("double");
+                }
+                if(value.equals("en"))
+                {
+                	list.add("enum");
+                	list.add("english");
+                }
+                if(value.equals("lo"))
+                {
+                	list.add("long");
+                }
+                if(value.equals("sh"))
+                {
+                	list.add("short");
+                }
+                if(value.equals("si"))
+                {
+                	list.add("signed");
+                }
+                if(value.equals("un"))
+                {
+                	list.add("union");
+                	list.add("unsigned");
+                }
+                if(value.equals("vo"))
+                {
+                	list.add("void");
+                }
+                if(value.equals("fo"))
+                {
+                	
+                	list.add("for");
+                }
+                if(value.equals("wh"))
+                {
+                	list.add("while");
+                	list.add("when");
+                	list.add("why");
+                	
+                }
+                if(value.equals("br"))
+                {
+                	list.add("break");
+                }
+                if(value.equals("con"))
+                {
+                	list.add("continue");
+                }
+                if(value.equals("el"))
+                {
+                	list.add("else");
+                }
+                if(value.equals("go"))
+                {
+                	list.add("goto");
+                }
+                if(value.equals("sw"))
+                {
+                	list.add("switch");
+                }
+                if(value.equals("ca"))
+                {
+                	list.add("case");
+                }
+                
+                if(value.equals("def"))
+                {
+                	list.add("default");
+                }
+                
+                if(value.equals("re"))
+                {
+                	list.add("return");
+                	list.add("register");
+                }
+                
+                if(value.equals("au"))
+                {
+                	list.add("auto");
+                }
+                
+                if(value.equals("ex"))
+                {
+                	list.add("extern");
+                	list.add("example");
+                }
+                
+                if(value.equals("reg"))
+                {
+                	list.add("register");
+                }
+                
+                if(value.equals("sta"))
+                {
+                	list.add("static");
+                }
+                
+                if(value.equals("con"))
+                {
+                	list.add("const");
+                	list.add("connect");
+                }
+                
+                if(value.equals("siz"))
+                {
+                	list.add("sizeof");
+                }
+                
+                if(value.equals("typ"))
+                {
+                	list.add("typedef");
+                }
+                
+                if(value.equals("vol"))
+                {
+                	list.add("volatile");
+                }
+                if(value.equals("{"))
+                {
+                	list.add("{}");
+                }
+                if(value.equals("#"))
+                {
+                	list.add("#include");
+                }
+                
+                
+//                if(value.equals(""))
+//                {
+//                	list.add("");
+//                }
+//                
+//接下来是java的包              
+//                if(value.equals("pri"))
+//                {
+//                	list.add("private");
+//                }
+//                if(value.equals("pub"))
+//                {
+//                	list.add("public");
+//                }
+//                if(value.equals("pro"))
+//                {
+//                	list.add("protected");
+//                }
+//                if(value.equals("abs"))
+//                {
+//                	list.add("abstract");
+//                }
+//                if(value.equals("cla"))
+//                {
+//                	list.add("class");
+//                }
+//                if(value.equals("ext"))
+//                {
+//                	list.add("extends");
+//                }
+//                if(value.equals("fin"))
+//                {
+//                	list.add("final");
+//                }
+//                if(value.equals("imp"))
+//                {
+//                	list.add("implements");
+//                }
+//                if(value.equals("int"))
+//                {
+//                	list.add("int");
+//                	list.add("interface");
+//                }
+//                if(value.equals("nat"))
+//                {
+//                	list.add("native");
+//                }
+//                if(value.equals("ne"))
+//                {
+//                	list.add("new");
+//                }
+//                if(value.equals("sta"))
+//                {
+//                	list.add("static");
+//                }
+//                if(value.equals("str"))
+//                {
+//                	list.add("strictfp");
+//                	list.add("string");
+//                	list.add("String");
+//                	
+//                }
+//                if(value.equals("syn"))
+//                {
+//                	list.add("synchronized");
+//                }
+//                if(value.equals("tra"))
+//                {
+//                	list.add("transient");
+//                }
+//                if(value.equals("vol"))
+//                {
+//                	list.add("volatile");
+//                }
+//                if(value.equals("br"))
+//                {
+//                	list.add("break");
+//                }
+//                if(value.equals("con"))
+//                {
+//                	list.add("continue");
+//                }
+//                if(value.equals("ret"))
+//                {
+//                	list.add("return");
+//                }
+//                if(value.equals("d"))
+//                {
+//                	list.add("do");
+//                }
+//                if(value.equals("wh"))
+//                {
+//                	list.add("while");
+//                }
+//                if(value.equals("el"))
+//                {
+//                	list.add("else");
+//                }
+//                if(value.equals("fo"))
+//                {
+//                	list.add("for");
+//                }
+//                if(value.equals("ins"))
+//                {
+//                	list.add("instanceof");
+//                }
+//                if(value.equals("swi"))
+//                {
+//                	list.add("switch");
+//                }
+//                if(value.equals("ca"))
+//                {
+//                	list.add("case");
+//                	list.add("catch");
+//                }
+//                if(value.equals("de"))
+//                {
+//                	list.add("default");
+//                }
+//                if(value.equals("cat"))
+//                {
+//                	list.add("catch");
+//                }
+//                if(value.equals("fi"))
+//                {
+//                	list.add("finally");
+//                }
+//                if(value.equals("fin"))
+//                {
+//                	list.add("finally");
+//                }
+//                if(value.equals("th"))
+//                {
+//                	list.add("throw");
+//                	list.add("throws");
+//                }
+//                if(value.equals("thr"))
+//                {
+//                	list.add("throw");
+//                	list.add("throws");
+//                }
+//                if(value.equals("thro"))
+//                {
+//                	list.add("throw");
+//                	list.add("throws");
+//                }
+//                if(value.equals("im"))
+//                {
+//                	list.add("import");
+//                }
+//                if(value.equals("pac"))
+//                {
+//                	list.add("package");
+//                }
+//                if(value.equals("bo"))
+//                {
+//                	list.add("bool");
+//                	list.add("boolean");
+//                }
+//                if(value.equals("by"))
+//                {
+//                	list.add("byte");
+//                }
+//                if(value.equals("ch"))
+//                {
+//                	list.add("char");
+//                }
+//                if(value.equals("do"))
+//                {
+//                	list.add("double");
+//                }
+//                if(value.equals("dou"))
+//                {
+//                	list.add("double");
+//                }
+//                if(value.equals("doub"))
+//                {
+//                	list.add("double");
+//                }
+//                if(value.equals("fl"))
+//                {
+//                	list.add("float");
+//                }
+//                if(value.equals("i"))
+//                {
+//                	list.add("int");
+//                }
+//                if(value.equals("lo"))
+//                {
+//                	list.add("long");
+//                }
+//                if(value.equals("sh"))
+//                {
+//                	list.add("short");
+//                }
+//                if(value.equals("nu"))
+//                {
+//                	list.add("null");
+//                	list.add("NULL");
+//                }
+//                if(value.equals("tr"))
+//                {
+//                	list.add("true");
+//                }
+//                if(value.equals("fa"))
+//                {
+//                	list.add("false");
+//                }
+//                if(value.equals("su"))
+//                {
+//                	list.add("super");
+//                }
+//                if(value.equals("th"))
+//                {
+//                	list.add("thank");
+//                	list.add("this");
+//                }
+//                if(value.equals("vo"))
+//                {
+//                	list.add("void");
+//                }
+//                if(value.equals("co"))
+//                {
+//                	list.add("const");
+//                }
+//                
+//                if(value.equals("go"))
+//                {
+//                	list.add("goto");
+//                }
+//                
+//                if(value.equals("abs"))
+//                {
+//                	list.add("abstract");
+//                }
+//                
+//                if(value.equals("ass"))
+//                {
+//                	list.add("assert");
+//                }
+//                
+//                if(value.equals(""))
+//                {
+//                	list.add("");
+//                }
+//                           
+                
+                myStringList=list;
                 setSuggestions(list, true, true);
             } else {
                 setSuggestions(null, false, false);
@@ -561,6 +1029,9 @@ public class SoftKeyboard extends InputMethodService
     
     public void setSuggestions(List<String> suggestions, boolean completions,
             boolean typedWordValid) {
+    	
+    	Log.i("test_dao","setSuggestions");
+    	
         if (suggestions != null && suggestions.size() > 0) {
             setCandidatesViewShown(true);
         } else if (isExtractViewShown()) {
@@ -572,6 +1043,9 @@ public class SoftKeyboard extends InputMethodService
     }
     
     private void handleBackspace() {
+    	
+    	Log.i("test_dao","handleBackspace");
+    	
         final int length = mComposing.length();
         if (length > 1) {
             mComposing.delete(length - 1, length);
@@ -588,6 +1062,9 @@ public class SoftKeyboard extends InputMethodService
     }
 
     private void handleShift() {
+    	
+    	Log.i("test_dao","handleShift");
+    	
         if (mInputView == null) {
             return;
         }
@@ -609,6 +1086,9 @@ public class SoftKeyboard extends InputMethodService
     }
     
     private void handleCharacter(int primaryCode, int[] keyCodes) {
+    	
+    	Log.i("test_dao","handleCharacter");
+    	
         if (isInputViewShown()) {
             if (mInputView.isShifted()) {
                 primaryCode = Character.toUpperCase(primaryCode);
@@ -626,12 +1106,18 @@ public class SoftKeyboard extends InputMethodService
     }
 
     private void handleClose() {
+    	
+    	Log.i("test_dao","handleClose");
+    	
         commitTyped(getCurrentInputConnection());
         requestHideSelf(0);
         mInputView.closing();
     }
 
     private void checkToggleCapsLock() {
+    	
+    	Log.i("test_dao","checkToggleCapsLock");
+    	
         long now = System.currentTimeMillis();
         if (mLastShiftTime + 800 > now) {
             mCapsLock = !mCapsLock;
@@ -642,19 +1128,31 @@ public class SoftKeyboard extends InputMethodService
     }
     
     private String getWordSeparators() {
+    	
+    	Log.i("test_dao","getWordSeparators");
+    	
         return mWordSeparators;
     }
     
     public boolean isWordSeparator(int code) {
+    	
+    	Log.i("test_dao","isWordSeparator");
+    	
         String separators = getWordSeparators();
         return separators.contains(String.valueOf((char)code));
     }
 
     public void pickDefaultCandidate() {
+    	
+    	Log.i("test_dao","pickDefaultCandidate");
+    	
         pickSuggestionManually(0);
     }
     
     public void pickSuggestionManually(int index) {
+    	
+    	Log.i("test_dao","pickSuggestionManually");
+    	
         if (mCompletionOn && mCompletions != null && index >= 0
                 && index < mCompletions.length) {
             CompletionInfo ci = mCompletions[index];
@@ -667,30 +1165,51 @@ public class SoftKeyboard extends InputMethodService
             // If we were generating candidate suggestions for the current
             // text, we would commit one of them here.  But for this sample,
             // we will just commit the current text.
-            commitTyped(getCurrentInputConnection());
+        	InputConnection inputConnection = getCurrentInputConnection();
+        	String value = myStringList.get(index);
+        	inputConnection.commitText(value, 1);
+            //commitTyped(getCurrentInputConnection());
         }
     }
     
     public void swipeRight() {
+    	
+    	Log.i("test_dao","swipeRight");
+    	
         if (mCompletionOn) {
             pickDefaultCandidate();
         }
     }
     
     public void swipeLeft() {
+    	
+    	Log.i("test_dao","swipeLeft");
+    	
         handleBackspace();
     }
 
     public void swipeDown() {
+    	
+    	Log.i("test_dao","swipeDown");
+    	
         handleClose();
     }
 
     public void swipeUp() {
+    	
+    	Log.i("test_dao","swipeUp");
+    	
     }
     
     public void onPress(int primaryCode) {
+    	
+    	Log.i("test_dao","primaryCode");
+    	
     }
     
     public void onRelease(int primaryCode) {
+    	
+    	Log.i("test_dao","primaryCode");
+    	
     }
 }
